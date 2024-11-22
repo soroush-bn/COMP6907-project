@@ -9,6 +9,11 @@ As an academic writer, I want you to summarize this part of my paper in one para
 
 """
 
+summary_prompt_other = """
+As an academic writer, I want you to summarize the input in only one paragraph and explain terms with proper mathematics 
+
+"""
+
 
 latex_prompt = """
 As a latex expert, I want you to convert this text to proper latex code with all the formulas(ONLY ouput latex code nothing else): 
