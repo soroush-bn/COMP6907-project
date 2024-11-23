@@ -4,6 +4,7 @@ from gpt import call_chatgpt
 from models import Model
 #1 getting text/s
 verbose = True
+model = Model("gpt")
 def get_text()->str:
     pass
 
@@ -11,14 +12,12 @@ def get_text()->str:
 #2 summarize
 def summarize(texts):
     summary= ""
-    model = Model()
     for text in texts:
 
         summary += model.call_model(
-            modelName = "Qwen/Qwen2.5-1.5B-Instruct",
-            prompt = summary_prompt_other,
+            prompt = summary_prompt,
             text = text,
-            maxToken = 300
+            max_token= 300
         )
         # summary+=(call_chatgpt(summary_prompt+text,300,API_KEY))
     if verbose: print(summary)
@@ -35,10 +34,10 @@ def merge(sums)->str:
 # latex
 def convert_to_latex(summary) :
 
-    latex_code = call_chatgpt(latex_prompt+summary,600,API_KEY)
+    latex_code = model.call_model(latex_prompt,summary,600)
     if verbose: print(latex_code)
 
-    latex = Latex(latex_code)
+    latex = Latex(latex_code,"3")
 
     print(latex.compile())
 

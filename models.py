@@ -5,12 +5,8 @@ sys.path.append(r"E:\programming\anaconda3\envs\cuda\lib\site-packages")
 import transformers 
 # from transformers import AutoModelForCausalLM, AutoTokenizer
 from consts import *
-import torch
-
+import requests
 # Check if GPU is available
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-print("Using device:", device)
-print(transformers)
 '''
 Models:
 1. HuggingFaceTB/SmolLM2-1.7B-Instruct
@@ -18,39 +14,60 @@ Models:
 3. Qwen/Qwen2.5-1.5B-Instruct
 '''
 class Model():
-    def __init__(self) -> None:
-        self.model_name = "gpt"
+    def __init__(self,model_name) -> None:
+        self.model_name = model_name
         self.max_token = 500
         self.prompt = ""
         self.text= ""
         
-    def call_model(self,modelName, prompt, text, maxToken):
-        device = "cuda"
-        tokenizer = transformers.AutoTokenizer.from_pretrained(modelName)
-        model = transformers.AutoModelForCausalLM.from_pretrained(modelName, trust_remote_code = True,low_cpu_mem_usage=True).to(device)
+    def call_model(self, prompt, text,max_token):
+        if self.model_name!= "gpt" :
 
-        messages = [
-            {
-                "role": "system",
-                "content": prompt
-            },
-            {
-                "role": "user",
-                "content": text
+            device = "cuda"
+            tokenizer = transformers.AutoTokenizer.from_pretrained(self.model_name)
+            model = transformers.AutoModelForCausalLM.from_pretrained(self.model_name, trust_remote_code = True,low_cpu_mem_usage=True).to(device)
+
+            messages = [
+                {
+                    "role": "system",
+                    "content": prompt
+                },
+                {
+                    "role": "user",
+                    "content": text
+                }
+            ]
+            input_text = tokenizer.apply_chat_template(messages, tokenize = False)
+            inputs = tokenizer.encode(input_text, return_tensors = "pt").to(device)
+            outputs = model.generate(
+                inputs,
+                max_new_tokens = max_token,
+                temperature = 0.7,
+                top_p = 0.9,
+                do_sample = True
+            )
+            out = tokenizer.decode(outputs[0])
+            if(self.model_name == "HuggingFaceTB/SmolLM2-1.7B-Instruct"):
+                return out.split("<|im_start|>assistant")[1].replace("<|im_end|>", "").strip()
+            elif(self.model_name == "openbmb/MiniCPM-2B-dpo-bf16"):
+                return out.split("<AI>")[1].replace("</s>", "").strip()
+            return out.split("<|im_start|>system")[2].replace("<|im_end|>", "").strip()
+        else:
+            url = "https://api.openai.com/v1/chat/completions"
+            headers = {
+                "Authorization": f"Bearer {API_KEY}",
+                "Content-Type": "application/json"
             }
-        ]
-        input_text = tokenizer.apply_chat_template(messages, tokenize = False)
-        inputs = tokenizer.encode(input_text, return_tensors = "pt").to(device)
-        outputs = model.generate(
-            inputs,
-            max_new_tokens = maxToken,
-            temperature = 0.7,
-            top_p = 0.9,
-            do_sample = True
-        )
-        out = tokenizer.decode(outputs[0])
-        if(modelName == "HuggingFaceTB/SmolLM2-1.7B-Instruct"):
-            return out.split("<|im_start|>assistant")[1].replace("<|im_end|>", "").strip()
-        elif(modelName == "openbmb/MiniCPM-2B-dpo-bf16"):
-            return out.split("<AI>")[1].replace("</s>", "").strip()
-        return out.split("<|im_start|>system")[2].replace("<|im_end|>", "").strip()
+            data = {
+                "model": "gpt-3.5-turbo",  # Use "gpt-3.5-turbo" for the GPT-3.5 model
+                "messages": [{"role": "system", "content": "You are a helpful assistant."},
+                            {"role": "user", "content": prompt+text}],
+                "temperature": 0.7,  # Adjust for creativity (0.0 for deterministic, 1.0 for creative)
+                "max_tokens": max_token  # Adjust for desired response length
+            }
+
+            response = requests.post(url, headers=headers, json=data)
+            if response.status_code == 200:
+                return response.json()['choices'][0]['message']['content']
+            else:
+                raise Exception(f"Error: {response.status_code} - {response.text}")

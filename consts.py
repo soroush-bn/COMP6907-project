@@ -21,4 +21,4 @@ As a latex expert, I want you to convert this text to proper latex code with all
 
 """
 
-API_KEY= "ur api key"
+API_KEY= "****"
