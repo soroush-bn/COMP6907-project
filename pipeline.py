@@ -1,7 +1,7 @@
 from latex import Latex
 from consts import *
 from gpt import call_chatgpt
-from models import call_model
+from models import Model
 #1 getting text/s
 verbose = True
 def get_text()->str:
@@ -11,8 +11,10 @@ def get_text()->str:
 #2 summarize
 def summarize(texts):
     summary= ""
+    model = Model()
     for text in texts:
-        summary += call_model(
+
+        summary += model.call_model(
             modelName = "Qwen/Qwen2.5-1.5B-Instruct",
             prompt = summary_prompt_other,
             text = text,
