@@ -14,11 +14,6 @@ As an academic writer, I want you to summarize the input in only one paragraph a
 
 """
 
-merge_prompt_other = """
-As an academic writer, I want you to write a text based on the input in only one paragraph
-
-"""
-
 
 latex_prompt = """
 As a latex expert, I want you to convert this text to proper latex code with all the formulas(ONLY ouput latex code nothing else): 
@@ -26,8 +21,10 @@ As a latex expert, I want you to convert this text to proper latex code with all
 
 """
 
-latex_prompt_other = """
-Please generate the LaTeX code for the following task. Ensure that the code is complete and compilable. If the task involves a document, include the necessary document class and preamble. If it involves equations, tables, or figures, ensure that all environments are properly opened and closed. The output must be a valid LaTeX document that can be compiled without errors.
+refine_prompt = """
+correct the latex code according to the error and output the refined version:
+latex code: {0}
+error: {1} 
 
 """
 
