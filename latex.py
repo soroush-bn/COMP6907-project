@@ -2,9 +2,9 @@ import os
 
 
 class Latex():
-    def __init__(self,text,name) -> None:
+    def __init__(self,text, name) -> None:
         self.raw_text =text
-        self.name= name
+        self.name = name
 
     def __to_tex(self):
         with open(f"{self.name}.tex", "w") as file:
