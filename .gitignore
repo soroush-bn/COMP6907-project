@@ -1,2 +1,7 @@
 DM-Project/
 __pycache__/
+
+*.log
+*.pdf
+*.tex
+*.aux
