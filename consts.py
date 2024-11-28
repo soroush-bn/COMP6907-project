@@ -27,7 +27,7 @@ As a latex expert, I want you to convert this text to proper latex code with all
 """
 
 latex_prompt_other = """
-Generate simple LaTeX code for the input text beginning with ONLY \begin{document} and ending with ONLY \end{document}. 
+Generate simple LaTeX code for the input text beginning with ONLY \documentclass{article} \begin{document} and ending with ONLY \end{document}. 
 """
 
 refine_prompt = """

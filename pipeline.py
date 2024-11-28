@@ -66,10 +66,13 @@ def main():
     if st.button("Generate PDFs"):
             texts = [text for text in texts if text]
 
-            if texts: 
-                sums = summarize(model, texts)
-                merged_summary = merge(model, sums)
-                convert_to_latex(model, merged_summary, filename)
+            if texts:
+                with st.spinner("Generating Summaries..."):
+                    sums = summarize(model, texts)
+                with st.spinner("Merging Summaries..."):
+                    merged_summary = merge(model, sums)
+                with st.spinner("Converting to LaTeX..."):
+                    convert_to_latex(model, merged_summary, filename)
                 st.success(f"PDF generated successfully!")
                 with open(f"{filename}.pdf", mode="rb") as f:
                     st.download_button(f"Download PDF", f, file_name = f"{filename}.pdf")
