@@ -28,6 +28,12 @@ class Model():
 
 
 
+
+    def eval(self,model_names, latex_codes):
+        for model,latex in zip(model_names,latex_codes):
+            eval_result = self.call_model(evaluation_prompt,f"{model}:{latex}")
+        return eval_result
+    
     def __embed_text(self, text):
         inputs = self.tokenizer(text, return_tensors="pt", truncation=True, padding=True)
         with torch.no_grad():
@@ -83,7 +89,7 @@ class Model():
                 "Content-Type": "application/json"
             }
             data = {
-                "model": "gpt-3.5-turbo",  # Use "gpt-3.5-turbo" for the GPT-3.5 model
+                "model": "gpt-3.5-turbo" if self.model_name=="gpt" else "gpt-4o-mini",  # Use "gpt-3.5-turbo" for the GPT-3.5 model
                 "messages": [{"role": "system", "content": "You are a helpful assistant."},
                             {"role": "user", "content": prompt+text}],
                 "temperature": 0.7,  # Adjust for creativity (0.0 for deterministic, 1.0 for creative)
