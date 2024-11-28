@@ -58,12 +58,12 @@ def convert_to_latex(summary, filename) :
 
     latex = Latex(latex_code, filename)
 
-    print(latex.compile())
-
+    compile_result = latex.compile()
+    return compile_result
 # if __name__=="__main__":
 #     convert_to_latex(merge(summarize([papers])))
 
-
+def refine_latex()
 
 def main():
     filename = "1"

@@ -23,9 +23,12 @@ As a latex expert, I want you to convert this text to proper latex code with all
 
 refine_prompt = """
 correct the latex code according to the error and output the refined version:
-latex code: {0}
-error: {1} 
+previous latex code: {0}
+errors after compiling it: {1} 
 
 """
+
+
+
 
 API_KEY= "****"
