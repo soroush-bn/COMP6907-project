@@ -33,13 +33,11 @@ class Latex():
             with open(f"{self.name}.log", "r") as file:
                 # Read the file's contents into a string
                 log_content = file.read()
-                pattern = r"^! LaTeX error.*?\.$"
-    
-            matches = re.findall(pattern, log_content, re.MULTILINE)
+                # pattern = r"LaTeX Error: "
+            idx1= log_content.find("LaTeX Error")
+            idx2= log_content.find("See the LaTeX")
 
-            for e in matches:
-                log_content+=e 
-            return log_content
+            return log_content[idx1:idx2]
         except FileNotFoundError:
             return f"Error: The file {self.name}.log does not exist."
         except Exception as e:

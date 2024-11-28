@@ -31,7 +31,7 @@ Generate simple LaTeX code for the input text beginning with ONLY \documentclass
 """
 
 refine_prompt = """
-correct the latex code according to the error and output the refined version:
+correct the latex code according to the error and output the refined version in plain text:
 previous latex code: {0}
 errors after compiling it: {1} 
 

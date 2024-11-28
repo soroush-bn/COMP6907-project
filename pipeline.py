@@ -24,12 +24,12 @@ def summarize(model, texts):
             max_token = 300
         )
     finish = time()
-
+    token_sec = model.get_tks(summary,finish-start)
     if verbose:
         print(summary)
-        print(model.get_tks(summary,finish-start))
+        print()
         print("token/second")
-    return summary
+    return summary, token_sec
 
 
 #3 merge
@@ -82,7 +82,7 @@ def main():
 
     model_name = st.selectbox(
         "Model",
-        ("HuggingFaceTB/SmolLM2-1.7B-Instruct", "openbmb/MiniCPM-2B-dpo-bf16", "Qwen/Qwen2.5-1.5B-Instruct")
+        ("HuggingFaceTB/SmolLM2-1.7B-Instruct", "openbmb/MiniCPM-2B-dpo-bf16", "Qwen/Qwen2.5-1.5B-Instruct", "gpt")
     )
     model = Model(model_name)
     texts = get_text()
@@ -91,11 +91,12 @@ def main():
         texts = [text for text in texts if text]
         if texts:
             with st.spinner("Generating Summaries..."):
-                sums = summarize(model, texts)
+                sums, token_per_second = summarize(model, texts)
+            st.markdown(f"**Token/Second: {token_per_second}**")
             with st.spinner("Merging Summaries..."):
                 merged_summary = merge(model, sums)
             with st.spinner("Converting to LaTeX..."):
-                compile_result,latex_code = convert_to_latex(model, merged_summary, filename)
+                compile_result,latex_code = convert_to_latex(model, merged_summary, filename)                
                 refined_result, _ = refine_latex(model = model, previous_latex_code=latex_code, compile_result=compile_result,filename=filename)
             if refined_result==compile_result or refined_result=="pdf is created":
                 st.success(f"PDF generated successfully!")
