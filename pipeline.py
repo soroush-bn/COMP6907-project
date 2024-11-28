@@ -1,8 +1,6 @@
 from latex import Latex
 from consts import *
-from gpt import call_chatgpt
 from models import Model
-from fpdf import FPDF
 import streamlit as st
 
 
@@ -53,8 +51,6 @@ def convert_to_latex(model, summary, filename) :
     return compile_result
 # if __name__=="__main__":
 #     convert_to_latex(merge(summarize([papers])))
-
-def refine_latex()
 
 def main():
     filename = "1"
