@@ -29,7 +29,7 @@ def get_gpu_usage():
 
             gpus.append(gpu_info)
 
-        return gpus
+        return gpu_info["GPU_Utilization_Percentage"]
 
     except Exception as e:
         print(f"Error while retrieving GPU usage: {e}")
