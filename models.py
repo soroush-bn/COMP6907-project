@@ -1,12 +1,8 @@
 # LLMs stored in ~/.cache/huggingface
-# import os 
-# import sys
-# sys.path.append(r"E:\programming\anaconda3\envs\cuda\lib\site-packages")
-import transformers 
-# from transformers import AutoModelForCausalLM, AutoTokenizer
+
+from transformers import AutoModelForCausalLM, AutoTokenizer, AutoModel
 from consts import *
-import requests
-import torch
+import torch, requests
 from sklearn.metrics.pairwise import cosine_similarity
 
 '''
@@ -14,24 +10,19 @@ Models:
 1. HuggingFaceTB/SmolLM2-1.7B-Instruct
 2. openbmb/MiniCPM-2B-dpo-bf16
 3. Qwen/Qwen2.5-1.5B-Instruct
-
 '''
+
 class Model():
     def __init__(self, model_name) -> None:
         self.model_name = model_name
-        # self.max_token = 500
-        self.prompt = ""
-        self.text = ""
-        self.load_in_4bit= True
-        self.tokenizer = transformers.AutoTokenizer.from_pretrained('bert-base-uncased')
-        self.embedding_model = transformers.AutoModel.from_pretrained("sentence-transformers/all-MiniLM-L6-v2")
+        self.load_in_4bit = False
+        self.tokenizer = AutoTokenizer.from_pretrained('bert-base-uncased')
+        self.embedding_model = AutoModel.from_pretrained("sentence-transformers/all-MiniLM-L6-v2")
 
-
-
-
-    def eval(self,model_names, latex_codes):
+    def eval(self, model_names, latex_codes):
+        eval_result = []
         for model,latex in zip(model_names,latex_codes):
-            eval_result = self.call_model(evaluation_prompt,f"{model}:{latex}")
+            eval_result.append(self.call_model(evaluation_prompt,f"{model}:{latex}"))
         return eval_result
     
     def __embed_text(self, text):
@@ -40,21 +31,21 @@ class Model():
             embeddings = self.model(**inputs).last_hidden_state
         return embeddings.mean(dim=1)
     
-
-    def get_similarity(self,latex_codes):
+    def get_similarity(self, latex_codes):
         embeddings = [self.__embed_text(code).numpy() for code in latex_codes]
         similarity_matrix = cosine_similarity(embeddings)
         return similarity_matrix
 
     def __number_of_tokens(self, text):
-        tokens = self.tokenizer.tokenize(text)
-        return len(tokens)
-    def get_tks(self,text,time):
-        return self.__number_of_tokens(text)/time 
+        return len(self.tokenizer.tokenize(text))
+    
+    def get_tks(self, text, time):
+        return self.__number_of_tokens(text)/time
+     
     def call_model(self, prompt, text, max_token):
         if self.model_name != "gpt" :
-            tokenizer = transformers.AutoTokenizer.from_pretrained(self.model_name)
-            model = transformers.AutoModelForCausalLM.from_pretrained(self.model_name, trust_remote_code = True,load_in_4bit=self.load_in_4bit).to("cuda")
+            tokenizer = AutoTokenizer.from_pretrained(self.model_name)
+            model = AutoModelForCausalLM.from_pretrained(self.model_name, trust_remote_code = True, load_in_4bit=self.load_in_4bit).to("cuda")
 
             messages = [
                 {

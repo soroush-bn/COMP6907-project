@@ -1,5 +1,4 @@
 import os  
-import re
 
 class Latex():
     def __init__(self,text, name) -> None:
@@ -7,13 +6,12 @@ class Latex():
         self.name = name
 
     def __to_tex(self):
-        with open(f"{self.name}.tex", "w") as file:
+        with open(f"./outputs/{self.name}.tex", "w") as file:
             file.write(self.raw_text)
-    def __pre_process(self):
-        pass
+
     def compile(self):
         self.__to_tex()
-        os.system(f"pdflatex -halt-on-error {self.name}.tex")
+        os.system(f"pdflatex -halt-on-error -output-directory=outputs ./outputs/{self.name}.tex")
         if not self.__check_pdf_exists():
             return self.__get_logs()
         else:
@@ -22,24 +20,21 @@ class Latex():
     
     def __check_pdf_exists(self):
 
-        if os.path.isfile(self.name +".pdf"):
+        if os.path.isfile(f"./outputs/{self.name}" +".pdf"):
             return True
         else:
             return False
 
     def __get_logs(self):
         try:
-            # Open the .log file in read mode
-            with open(f"{self.name}.log", "r") as file:
-                # Read the file's contents into a string
+            with open(f"./outputs/{self.name}.log", "r") as file:
                 log_content = file.read()
-                # pattern = r"LaTeX Error: "
             idx1= log_content.find("LaTeX Error")
             idx2= log_content.find("See the LaTeX")
 
             return log_content[idx1:idx2]
         except FileNotFoundError:
-            return f"Error: The file {self.name}.log does not exist."
+            return f"Error: The file ./outputs/{self.name}.log does not exist."
         except Exception as e:
             return f"An error occurred: {e}"
 
