@@ -22,6 +22,7 @@ class Model():
         # self.max_token = 500
         self.prompt = ""
         self.text = ""
+        self.load_in_4bit= True
         self.tokenizer = transformers.AutoTokenizer.from_pretrained('bert-base-uncased')
         self.embedding_model = transformers.AutoModel.from_pretrained("sentence-transformers/all-MiniLM-L6-v2")
 
@@ -47,7 +48,7 @@ class Model():
     def call_model(self, prompt, text, max_token):
         if self.model_name != "gpt" :
             tokenizer = transformers.AutoTokenizer.from_pretrained(self.model_name)
-            model = transformers.AutoModelForCausalLM.from_pretrained(self.model_name, trust_remote_code = True).to("cuda")
+            model = transformers.AutoModelForCausalLM.from_pretrained(self.model_name, trust_remote_code = True,load_in_4bit=self.load_in_4bit).to("cuda")
 
             messages = [
                 {
