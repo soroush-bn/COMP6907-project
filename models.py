@@ -6,6 +6,8 @@ import transformers
 # from transformers import AutoModelForCausalLM, AutoTokenizer
 from consts import *
 import requests
+import torch
+from sklearn.metrics.pairwise import cosine_similarity
 
 '''
 Models:
@@ -21,7 +23,21 @@ class Model():
         self.prompt = ""
         self.text = ""
         self.tokenizer = transformers.AutoTokenizer.from_pretrained('bert-base-uncased')
+        self.embedding_model = transformers.AutoModel.from_pretrained("sentence-transformers/all-MiniLM-L6-v2")
 
+
+
+    def __embed_text(self, text):
+        inputs = self.tokenizer(text, return_tensors="pt", truncation=True, padding=True)
+        with torch.no_grad():
+            embeddings = self.model(**inputs).last_hidden_state
+        return embeddings.mean(dim=1)
+    
+
+    def get_similarity(self,latex_codes):
+        embeddings = [self.__embed_text(code).numpy() for code in latex_codes]
+        similarity_matrix = cosine_similarity(embeddings)
+        return similarity_matrix
 
     def __number_of_tokens(self, text):
         tokens = self.tokenizer.tokenize(text)
