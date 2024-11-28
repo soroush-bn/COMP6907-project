@@ -1,5 +1,6 @@
 import re 
 import subprocess 
+import torch 
 def get_gpu_usage():
     try:
         # Run the `nvidia-smi` command and capture the output
@@ -33,3 +34,10 @@ def get_gpu_usage():
     except Exception as e:
         print(f"Error while retrieving GPU usage: {e}")
         return []
+    
+
+def free_gpu(model):
+    del model
+    torch.cuda.empty_cache()
+    import gc
+    gc.collect()
