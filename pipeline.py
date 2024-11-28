@@ -48,10 +48,28 @@ def convert_to_latex(model, summary, filename) :
     latex = Latex(latex_code, filename)
 
     compile_result = latex.compile()
-    return compile_result
+    return compile_result,latex_code
+
 # if __name__=="__main__":
 #     convert_to_latex(merge(summarize([papers])))
+def refine_latex(model,previous_latex_code,compile_result,filename):
+    refined_result = "err"
+    cutoff = 5
+    if compile_result =="pdf is created": 
+        return compile_result,previous_latex_code
+    else:
+        prompt = refine_prompt.format(previous_latex_code,compile_result) 
+        while not refined_result=="pdf is created" and cutoff>0:
+            cutoff-=1
+            refined_code = model.call_model(prompt,"give me ONLY the correct latex code:",1000 )
+            
+            if verbose: print(refined_code)
 
+            latex = Latex(refined_code, filename)
+
+            refined_result = latex.compile() 
+    return refined_result,refined_code
+        
 def main():
     filename = "1"
     st.title("Latex code generator of multiple scientific texts")
@@ -64,20 +82,23 @@ def main():
     texts = get_text()
 
     if st.button("Generate PDFs"):
-            texts = [text for text in texts if text]
-
-            if texts:
-                with st.spinner("Generating Summaries..."):
-                    sums = summarize(model, texts)
-                with st.spinner("Merging Summaries..."):
-                    merged_summary = merge(model, sums)
-                with st.spinner("Converting to LaTeX..."):
-                    convert_to_latex(model, merged_summary, filename)
+        texts = [text for text in texts if text]
+        if texts:
+            with st.spinner("Generating Summaries..."):
+                sums = summarize(model, texts)
+            with st.spinner("Merging Summaries..."):
+                merged_summary = merge(model, sums)
+            with st.spinner("Converting to LaTeX..."):
+                compile_result,latex_code = convert_to_latex(model, merged_summary, filename)
+                refined_result, _ = refine_latex(model = model, previous_latex_code=latex_code, compile_result=compile_result,filename=filename)
+            if refined_result==compile_result or refined_result=="pdf is created":
                 st.success(f"PDF generated successfully!")
                 with open(f"{filename}.pdf", mode="rb") as f:
                     st.download_button(f"Download PDF", f, file_name = f"{filename}.pdf")
             else:
-                st.warning(f"No input. Skipping...")
+                st.warning(f"Couldn't create pdf after 5 attempt...")
+        else:
+            st.warning(f"No input. Skipping...")
 
 if __name__ == "__main__":
     main()
