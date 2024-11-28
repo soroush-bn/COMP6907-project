@@ -8,15 +8,7 @@ import streamlit as st
 
 verbose = True
 
-models = [
-    Model("HuggingFaceTB/SmolLM2-1.7B-Instruct"),
-    Model("AnotherModel/Example-1"),
-    Model("YetAnotherModel/Example-2")
-]
-# model = Model("HuggingFaceTB/SmolLM2-1.7B-Instruct")
-
 def get_text():
-    # user input in streamlit
     text1 = st.text_area("Text 1", height=200)
     text2 = st.text_area("Text 2", height=200)
     text3 = st.text_area("Text 3", height=200)
@@ -24,7 +16,7 @@ def get_text():
     return [text1, text2, text3]
 
 #2 summarize
-def summarize(texts):
+def summarize(model, texts):
     summary =  ""
     for text in texts:
         summary += model.call_model(
@@ -32,13 +24,12 @@ def summarize(texts):
             text = text,
             max_token = 300
         )
-        # summary+=(call_chatgpt(summary_prompt+text,300,API_KEY))
     if verbose: print(summary)
     return summary
 
 
 #3 merge
-def merge(sums)->str:
+def merge(model, sums)->str:
     sums = model.call_model(
         prompt = merge_prompt_other,
         text = sums,
@@ -51,7 +42,7 @@ def merge(sums)->str:
 
 
 # latex
-def convert_to_latex(summary, filename) :
+def convert_to_latex(model, summary, filename) :
 
     latex_code = model.call_model(latex_prompt_other, summary, 600)
     if verbose: print(latex_code)
@@ -69,32 +60,25 @@ def main():
     filename = "1"
     st.title("Latex code generator of multiple scientific texts")
 
-    # Get text from user input (via Streamlit)
+    model_name = st.selectbox(
+        "Model",
+        ("HuggingFaceTB/SmolLM2-1.7B-Instruct", "openbmb/MiniCPM-2B-dpo-bf16", "Qwen/Qwen2.5-1.5B-Instruct")
+    )
+    model = Model(model_name)
     texts = get_text()
 
     if st.button("Generate PDFs"):
-        for i, model in enumerate(models):
-            filename = f"model_{i+1}_output"  # Generate a unique filename for each model
+            texts = [text for text in texts if text]
 
-            # Filter out empty texts
-            non_empty_texts = [text for text in texts if text]
-
-            if non_empty_texts: 
-                # Step 1: Summarize
-                summary = summarize(non_empty_texts, model)
-
-                # Step 2: Merge summaries into one paragraph
-                merged_summary = merge(summary, model)
-
-                # Step 3: Convert merged summary to LaTeX and generate PDF for each model
-                convert_to_latex(merged_summary, filename, model)
-
-                # Provide the user with a download button for each generated PDF
-                st.success(f"PDF generated for Model {i+1} successfully!")
+            if texts: 
+                sums = summarize(model, texts)
+                merged_summary = merge(model, sums)
+                convert_to_latex(model, merged_summary, filename)
+                st.success(f"PDF generated successfully!")
                 with open(f"{filename}.pdf", mode="rb") as f:
-                    st.download_button(f"Download PDF for Model {i+1}", f, file_name=f"{filename}.pdf")
+                    st.download_button(f"Download PDF", f, file_name = f"{filename}.pdf")
             else:
-                st.warning(f"No input for Model {i+1}. Skipping...")
+                st.warning(f"No input. Skipping...")
 
 if __name__ == "__main__":
     main()

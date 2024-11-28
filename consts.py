@@ -15,10 +15,19 @@ As an academic writer, I want you to summarize the input in only one paragraph a
 """
 
 
+merge_prompt_other = """
+As an academic writer, I want you to write a text based on the input in only one paragraph
+"""
+
+
 latex_prompt = """
 As a latex expert, I want you to convert this text to proper latex code with all the formulas(ONLY ouput latex code nothing else): 
 
 
+"""
+
+latex_prompt_other = """
+Generate simple LaTeX code for the input text beginning with ONLY \begin{document} and ending with ONLY \end{document}. 
 """
 
 refine_prompt = """
