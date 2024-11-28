@@ -1,5 +1,5 @@
 import os  
-
+import re
 
 class Latex():
     def __init__(self,text, name) -> None:
@@ -33,6 +33,12 @@ class Latex():
             with open(f"{self.name}.log", "r") as file:
                 # Read the file's contents into a string
                 log_content = file.read()
+                pattern = r"^! LaTeX error.*?\.$"
+    
+            matches = re.findall(pattern, log_content, re.MULTILINE)
+
+            for e in matches:
+                log_content+=e 
             return log_content
         except FileNotFoundError:
             return f"Error: The file {self.name}.log does not exist."

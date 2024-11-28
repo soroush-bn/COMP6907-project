@@ -20,7 +20,14 @@ class Model():
         # self.max_token = 500
         self.prompt = ""
         self.text = ""
-        
+        self.tokenizer = transformers.AutoTokenizer.from_pretrained('bert-base-uncased')
+
+
+    def __number_of_tokens(self, text):
+        tokens = self.tokenizer.tokenize(text)
+        return len(tokens)
+    def get_tks(self,text,time):
+        return self.__number_of_tokens(text)/time 
     def call_model(self, prompt, text, max_token):
         if self.model_name != "gpt" :
             tokenizer = transformers.AutoTokenizer.from_pretrained(self.model_name)

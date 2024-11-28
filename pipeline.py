@@ -2,7 +2,7 @@ from latex import Latex
 from consts import *
 from models import Model
 import streamlit as st
-
+from time import time
 
 verbose = True
 
@@ -16,13 +16,19 @@ def get_text():
 #2 summarize
 def summarize(model, texts):
     summary =  ""
+    start = time()
     for text in texts:
         summary += model.call_model(
             prompt = summary_prompt,
             text = text,
             max_token = 300
         )
-    if verbose: print(summary)
+    finish = time()
+
+    if verbose:
+        print(summary)
+        print(model.get_tks(summary,finish-start))
+        print("token/second")
     return summary
 
 
