@@ -38,6 +38,20 @@ errors after compiling it: {1}
 """
 
 
+evaluation_prompt = """
+As an latex code expert, evaluate these latex codes and their content of different generative models based on these criteria
+1. relavent and logical content, 30 points
+2. using mathematic formula, 10 points 
+3. using correct latex code and format, 50 points
+4. using academic voice, 10 points
 
+now, you will be given latex codes and name of the models in this format and you should score them based on the criteria, only output the score of each part without any explanation: 
+
+model_name1 : "latex_code_generated1"
+model_name2 : "latex_code_generated2"
+.
+.
+
+"""
 
 API_KEY= "****"
