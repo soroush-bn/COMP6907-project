@@ -7,7 +7,13 @@ import streamlit as st
 
 
 verbose = True
-model = Model("HuggingFaceTB/SmolLM2-1.7B-Instruct")
+
+models = [
+    Model("HuggingFaceTB/SmolLM2-1.7B-Instruct"),
+    Model("AnotherModel/Example-1"),
+    Model("YetAnotherModel/Example-2")
+]
+# model = Model("HuggingFaceTB/SmolLM2-1.7B-Instruct")
 
 def get_text():
     # user input in streamlit
@@ -66,49 +72,30 @@ def main():
     # Get text from user input (via Streamlit)
     texts = get_text()
 
-    # Button to trigger the background process
-    if st.button("Generate PDF"):
-        # Ensure all text areas have been filled
-        if all(texts):
-            # Step 1: Summarize the texts
-            summary = summarize(texts)
+    if st.button("Generate PDFs"):
+        for i, model in enumerate(models):
+            filename = f"model_{i+1}_output"  # Generate a unique filename for each model
 
-            # Step 2: Merge summaries into one paragraph
-            merged_summary = merge(summary)
+            # Filter out empty texts
+            non_empty_texts = [text for text in texts if text]
 
-            # Step 3: Convert merged summary to LaTeX and generate PDF
-            convert_to_latex(merged_summary, filename)
+            if non_empty_texts: 
+                # Step 1: Summarize
+                summary = summarize(non_empty_texts, model)
 
-            # Provide the user with a download button for the generated PDF
-            st.success("PDF generated successfully!")
-            with open(f"{filename}.pdf", mode = "rb") as f:
-                st.download_button("Download PDF", f, file_name = "summary_output.pdf")
-        else:
-            st.error("Please fill in all the text areas.")
+                # Step 2: Merge summaries into one paragraph
+                merged_summary = merge(summary, model)
+
+                # Step 3: Convert merged summary to LaTeX and generate PDF for each model
+                convert_to_latex(merged_summary, filename, model)
+
+                # Provide the user with a download button for each generated PDF
+                st.success(f"PDF generated for Model {i+1} successfully!")
+                with open(f"{filename}.pdf", mode="rb") as f:
+                    st.download_button(f"Download PDF for Model {i+1}", f, file_name=f"{filename}.pdf")
+            else:
+                st.warning(f"No input for Model {i+1}. Skipping...")
 
 if __name__ == "__main__":
     main()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
