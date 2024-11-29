@@ -4,7 +4,7 @@ from models import Model
 import streamlit as st
 from time import time
 from datetime import datetime
-from utils import free_gpu
+from utils import *
 
 file_dir = "latex_codes.txt"
 textboxs = []
@@ -48,11 +48,7 @@ def convert_to_latex(model, summary, filename, verbose = False) :
 
     code = latex_code.split("```")
     if(len(code) == 3):
-        latex_code = code[1]
-
-    print("=================")
-    print(latex_code)
-    print("+++++++++++++++++")
+        latex_code = code[1].split("\n", 1)[1]
 
     latex = Latex(latex_code, filename)
 
@@ -77,6 +73,23 @@ def refine_latex(model,previous_latex_code,compile_result,filename, verbose = Fa
             refined_result = latex.compile() 
     return refined_result,refined_code
 
+def evaluation():
+    model = Model("gpt")
+    with open("./latex_codes.txt", mode = "r") as f:
+        latex_codes = f.read().split("*SSS*")[:-1]
+        model_names = ["HuggingFaceTB/SmolLM2-1.7B-Instruct", "openbmb/MiniCPM-2B-dpo-bf16", "Qwen/Qwen2.5-1.5B-Instruct", "gpt"]
+    print("Model Evaluation: ")
+    for val in model.eval(model_names, latex_codes):
+        print(val)
+        print("++++++++++++++++++++++++++++++")
+
+def similarity():
+    model = Model("gpt")
+    with open("./latex_codes.txt", mode = "r") as f:
+        latex_codes = f.read().split("*SSS*")[:-1]
+    print("LaTeX Code Similarity: ")
+    print(model.get_similarity(latex_codes))
+    print("++++++++++++++++++++++++++++++") 
 
 def main():
     filename = f"out_{datetime.now().strftime('%Y-%m-%d_%H:%M:%S')}"
@@ -95,6 +108,8 @@ def main():
     if "count" not in st.session_state:
         st.session_state.count = 0
 
+    placeholder = st.empty()
+
     if st.button("Add New Text Box"):
         on_button_click()
 
@@ -105,13 +120,16 @@ def main():
     if st.button("Generate PDFs"):
         texts = [text for text in textboxs if text]
         if texts:
+            placeholder.markdown(get_gpu_details_string(get_gpu_usage()))
             with st.spinner("Generating Summaries..."):
                 sums, token_per_second = summarize(model, texts, verbose)
             st.markdown(f"**Token/Second: {token_per_second}**")
             
+            placeholder.markdown(get_gpu_details_string(get_gpu_usage()))
             with st.spinner("Merging Summaries..."):
                 merged_summary = merge(model, sums, verbose)
             
+            placeholder.markdown(get_gpu_details_string(get_gpu_usage()))
             with st.spinner("Converting to LaTeX..."):
                 compile_result, latex_code = convert_to_latex(model, merged_summary, filename, verbose)                
                 refined_result, refined_latex_code = refine_latex(
@@ -121,10 +139,11 @@ def main():
                     filename = filename,
                     verbose = verbose
                 )
-                with open(file_dir, 'w+') as f :
+                with open(file_dir, 'a') as f :
                     f.write(refined_latex_code)
-                    f.write('*SSS*')
+                    f.write('\n*SSS*\n')
 
+            placeholder.markdown(get_gpu_details_string(get_gpu_usage()))
             if refined_result == compile_result or refined_result == "pdf is created":
                 free_gpu(model)
                 try:
@@ -145,3 +164,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+    # evaluation()
+    # similarity()

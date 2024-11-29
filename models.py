@@ -4,6 +4,7 @@ from transformers import AutoModelForCausalLM, AutoTokenizer, AutoModel
 from consts import *
 import torch, requests
 from sklearn.metrics.pairwise import cosine_similarity
+import numpy as np
 
 '''
 Models:
@@ -22,17 +23,18 @@ class Model():
     def eval(self, model_names, latex_codes):
         eval_result = []
         for model,latex in zip(model_names,latex_codes):
-            eval_result.append(self.call_model(evaluation_prompt,f"{model}:{latex}"))
+            eval_result.append(self.call_model(evaluation_prompt, f"{model}:{latex}", 600))
         return eval_result
     
     def __embed_text(self, text):
         inputs = self.tokenizer(text, return_tensors="pt", truncation=True, padding=True)
         with torch.no_grad():
-            embeddings = self.model(**inputs).last_hidden_state
+            embeddings = self.embedding_model(**inputs).last_hidden_state
         return embeddings.mean(dim=1)
     
     def get_similarity(self, latex_codes):
-        embeddings = [self.__embed_text(code).numpy() for code in latex_codes]
+        embeddings = np.array([np.squeeze(self.__embed_text(code).numpy()) for code in latex_codes])
+        print(embeddings.shape)
         similarity_matrix = cosine_similarity(embeddings)
         return similarity_matrix
 
@@ -72,7 +74,7 @@ class Model():
                 return out.split("<|im_start|>assistant")[1].replace("<|im_end|>", "").strip()
             elif(self.model_name == "openbmb/MiniCPM-2B-dpo-bf16"):
                 return out.split("<AI>")[1].replace("</s>", "").strip()
-            return out.split("<|im_start|>system")[2].replace("<|im_end|>", "").strip()
+            return out.split("<|im_start|>")[3].split("\n", 1)[1].replace("<|im_end|>", "").strip()
         else:
             url = "https://api.openai.com/v1/chat/completions"
             headers = {

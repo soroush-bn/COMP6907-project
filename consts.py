@@ -6,7 +6,7 @@ Broadly speaking, we can distinguish between two classes of geometric learning p
 Dimensionality reduction involves mapping a set of high dimensional input points onto a low dimensional manifold so that “similar” points in input space are mapped to nearby points on the manifold. We present a method called Dimensionality Reduction by Learning an Invariant Mapping (DrLIM) for learning a globally coherent non-linear function that maps the data evenly to the output manifold. The learning relies solely on neighborhood relationships and does not require any distance measure in the input space. The method can learn mappings that are invariant to certain transformations of the inputs, as is demonstrated with a number of experiments. Comparisons are made to other techniques, in particular LLE.
 ---
 In mathematics, the Pythagorean theorem or Pythagoras' theorem is a fundamental relation in Euclidean geometry between the three sides of a right triangle. It states that the area of the square whose side is the hypotenuse (the side opposite the right angle) is equal to the sum of the areas of the squares on the other two sides.
----
+
 The theorem can be written as an equation relating the lengths of the sides a, b and the hypotenuse c, sometimes called the Pythagorean equation:[1]
 
     a 2 + b 2 = c 2 
@@ -43,7 +43,7 @@ As a latex expert, I want you to convert this text to proper latex code with all
 """
 
 latex_prompt_other = """
-Generate simple LaTeX code for the input text beginning with ONLY \documentclass{article} \begin{document} and ending with ONLY \end{document}. You MUST put the LaTeX code in ONLY ```.
+Generate simple LaTeX code for the input text beginning with ONLY \documentclass{article} \begin{document} and ending with ONLY \end{document}.
 """
 
 refine_prompt = """
@@ -55,19 +55,14 @@ errors after compiling it: {1}
 
 
 evaluation_prompt = """
-As an latex code expert, evaluate these latex codes and their content of different generative models based on these criteria
+As an latex code expert, evaluate the input latex code and its content based on these criteria
 1. relavent and logical content, 30 points
 2. using mathematic formula, 10 points 
 3. using correct latex code and format, 50 points
 4. using academic voice, 10 points
 
-now, you will be given latex codes and name of the models in this format and you should score them based on the criteria, only output the score of each part without any explanation: 
-
-model_name1 : "latex_code_generated1"
-model_name2 : "latex_code_generated2"
-.
-.
+You should score the input based on the criteria. Provide your score for each section
 
 """
 
-API_KEY= "****"
+API_KEY= "***"
